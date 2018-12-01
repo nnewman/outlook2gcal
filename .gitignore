@@ -1,0 +1,6 @@
+.idea
+secrets.py
+htmlcov
+.coverage
+.pytest_cache
+__pycache__
