@@ -7,7 +7,7 @@ import secrets
 
 if __name__ == '__main__':
     """
-    Main runner. For each Exchange account, process events every 20 minutes
+    Main runner. For each Exchange account, process events every 30 minutes
     """
     while True:
         for exchange_acct in secrets.EXCHANGE_ACCOUNTS:
