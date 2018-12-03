@@ -40,29 +40,50 @@ class GoogleCalendarApiClient(_GoogleApiClient):
     service_type = 'calendar'
     service_version = 'v3'
 
-    def get_events(self, calendar_id, time_min=None, order_by='startTime'):
+    def get_events(self, calendar_id, time_min=None, time_max=None):
         """
         Get all events for a given calendar.
 
         Args:
             calendar_id (str): Google Calendar ID to query
             time_min (datetime.datetime, None): Earliest event time
-            order_by (str): Field to order on for return events
+            time_max (datetime.datetime, None): Latest event time
 
         Returns:
              list[dict]: Events from the calendar
         """
-        if not time_min:
-            time_min = datetime.datetime.utcnow().isoformat() + 'Z'
-        events = self.service.events().list(
-            calendarId=calendar_id,
-            timeMin=time_min,
-            maxResults=10,
-            singleEvents=True,
-            orderBy=order_by
-        ).execute()
+        event_set = []
 
-        return events.get('items', [])
+        current_dt = datetime.datetime.utcnow()
+
+        if not time_min:
+            time_min = current_dt.isoformat() + 'Z'
+
+        if not time_max:
+            next_month = arrow.get(time_min).shift(months=+1).naive
+            time_max = next_month.isoformat() + 'Z'
+
+        page_token = None
+
+        while True:
+
+            events = self.service.events().list(
+                calendarId=calendar_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                maxResults=100,
+                singleEvents=True,
+                pageToken=page_token,
+            ).execute()
+
+            event_set += events.get('items', [])
+
+            page_token = events.get('nextPageToken')
+
+            if not page_token:
+                break
+
+        return event_set
 
     def create_event(self, calendar_id, name, location, body, start, end,
                      ews_id=None, change_key=None, recurrence=None):

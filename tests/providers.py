@@ -20,7 +20,9 @@ class Event:
 
 def random_exchange_event():
     start_date = arrow.get(faker.future_datetime(end_date='+30d'))
-    end_date = arrow.get(start_date.isoformat()).replace(hour=+1)
+    end_date = arrow.get(start_date.isoformat()).replace(
+        hour=start_date.hour + 1
+    )
 
     if faker.pybool():
         mime_content = b"""

@@ -1,7 +1,7 @@
 from time import sleep
 
 import arrow
-from exchangelib import UTC_NOW
+from exchangelib import UTC_NOW, UTC, EWSDateTime
 from tzlocal.windows_tz import win_tz
 
 from .exchange_api import ExchangeApiClient
@@ -31,13 +31,17 @@ class SyncRunner:
         )
         self.calendar_id = calendar_id
 
-    def _get_exchange_events(self):
+    def _get_exchange_events(self, sync_all=False):
         """
         Getter for events from the Exchange mailbox. Filters for events
         after the current time.
         """
+        start = UTC_NOW()
+        if sync_all:
+            start = EWSDateTime(day=1, month=1, year=1970, tzinfo=UTC)
+
         return self.exchange.get_events().filter(
-            start__gte=UTC_NOW()
+            start__gte=start
         ).order_by('start')
 
     def _get_google_events(self):
